@@ -1,8 +1,8 @@
 #include <iostream>
 #include <iomanip>
 #include <string>
-#include <thread> 
-#include <chrono> 
+#include <thread>
+#include <chrono>
 
 using namespace std;
 
@@ -25,6 +25,16 @@ void displayLoadingBar(int duration) {
     cout << endl;
 }
 
+void printReceipt(string drinkName, double drinkCost, double change, double tipAmount) {
+    cout << "==================================== RECEIPT ====================================" << endl;
+    cout << "ITEM PURCHASED: " << drinkName << endl;
+    cout << "PRICE: $" << fixed << setprecision(2) << drinkCost << endl;
+    cout << "TIP: $" << fixed << setprecision(2) << tipAmount << endl;
+    cout << "TOTAL PAID: $" << fixed << setprecision(2) << (drinkCost + tipAmount) << endl;
+    cout << "CHANGE: $" << fixed << setprecision(2) << change << endl;
+    cout << "=================================================================================" << endl;
+}
+
 int main() {
     int water = 300;  // initial water amount in milliliters
     int milk = 200;   // initial milk amount in milliliters
@@ -35,37 +45,35 @@ int main() {
     const double LATTE_COST = 2.50;
     const double CAPPUCCINO_COST = 3.00;
 
-    bool paymentSuccess = false;
-    string drinkName;
-
     while (true) {
         cout << "===========================================================================================" << endl;
-        cout << "                                   WELCOME TO BIGOO COFFE STATION                           " << endl;
-        cout << "===========================================================================================\n  " << endl;
-        cout << "                                   WHAT DO YOU WANT TO DO?:                           " << endl;
-        cout << "                                   1. Buy a drink                                   \n  " << endl;
-        cout << "                                   2. Check report                                   \n  " << endl;
-        cout << "                                   3. Turn off the machine                                   \n  " << endl;
-        cout <<"                                   Enter your choice:                                   \n   ";
+        cout << "                                   WELCOME TO BIGOO COFFEE STATION                           " << endl;
+        cout << "===========================================================================================" << endl;
+        cout << "                                   WHAT DO YOU WANT TO DO?:                                " << endl;
+        cout << "                                   1. Buy a drink                                        " << endl;
+        cout << "                                   2. Check report                                       " << endl;
+        cout << "                                   3. Turn off the machine                                " << endl;
+        cout << "                                   Enter your choice:                                     ";
 
         int choice;
         cin >> choice;
 
         switch (choice) {
         case 1: {
-            cout << "                                   Available :                                   \n  " << endl;
-            cout << "                                   1. Espresso ($1.50)                                   \n  " << endl;
-            cout << "                                      ( ( )\n                                      ) )\n                                   ( ( )\n                                   (`-' )                                   \n                                     " << endl;
-            cout << "                                   2. Latte ($2.50)                                   \n  " << endl;
-            cout << "                                      ( ( ( )\n                                      ) ) )\n                                   ( ( ( )\n                                     `-' ) ) )                                   \n  " << endl;
-            cout << "                                   3. Cappuccino ($3.00)                                   \n  " << endl;
+            cout << "                                   Available Drinks:                                   " << endl;
+            cout << "                                   1. Espresso ($1.50)                                   " << endl;
+            cout << "                                      ( ( )\n                                      ) )\n                                   ( ( )\n                                   (`-' )                                   " << endl;
+            cout << "                                   2. Latte ($2.50)                                   " << endl;
             cout << "                                      ( ( ( )\n                                      ) ) )\n                                   ( ( ( )\n                                     `-' ) ) )                                   " << endl;
-            cout << "                                   Which Coffe Favor Can We Offer You?:                                   \n   ";
+            cout << "                                   3. Cappuccino ($3.00)                                   " << endl;
+            cout << "                                      ( ( ( )\n                                      ) ) )\n                                   ( ( ( )\n                                     `-' ) ) )                                   " << endl;
+            cout << "                                   Which Coffee Flavor Can We Offer You?:               ";
 
             int drinkChoice;
             cin >> drinkChoice;
 
             double drinkCost;
+            string drinkName;
 
             switch (drinkChoice) {
             case 1:
@@ -81,75 +89,71 @@ int main() {
                 drinkCost = CAPPUCCINO_COST;
                 break;
             default:
-                cout << "                                   Invalid drink choice.                                   \n  " << endl;
+                cout << "                                   Invalid drink choice.                                " << endl;
                 continue;
             }
 
-            cout << "                                   Select payment mode (1. Cash / 2. Credit Card / 3. Mobile Money):                                    \n  ";
-            int paymentChoice;
-            cin >> paymentChoice;
+            cout << "                                   Please insert coins ($" << fixed << setprecision(2) << drinkCost << "): ";
+            double coinsInserted;
+            cin >> coinsInserted;
 
-            paymentSuccess = false;
+            // Handle overpaid cash and tipping
+            double change = coinsInserted - drinkCost;
+            double tipAmount = 0;
 
-            if (paymentChoice == 1) {
-                cout << "                                   Please insert coins ($" << fixed << setprecision(2) << drinkCost << "):                                    \n  ";
-                double coinsInserted;
-                cin >> coinsInserted;
-                if (coinsInserted >= drinkCost) {
-                    paymentSuccess = true;
+            if (change >= 0) {
+                cout << "                                   Would you like to leave a tip? (1. Yes / 2. No): ";
+                int tipChoice;
+                cin >> tipChoice;
+                if (tipChoice == 1) {
+                    cout << "                                   Enter tip amount: $";
+                    cin >> tipAmount;
+                    if (tipAmount > change) {
+                        cout << "                                   Invalid tip amount. Tip cannot exceed the change.                     " << endl;
+                        continue;
+                    }
+                    change -= tipAmount;
                 }
-            }
-            else if (paymentChoice == 2) {
-                cout << "                                   Insert credit card and press Enter to process payment...                                   \n  " << endl;
-               
-                cin.ignore(); 
-                cin.get();    
-                paymentSuccess = true;
-            }
-            else if (paymentChoice == 3) {
-                cout << "Enter mobile money number to process payment: " << endl;
-                string number;
-                cin >> number;
 
-                cout << "                                   Confirm payment by inputing your pin as confirmation on the pop-up message on your phone                                    \n  " << endl;
-                displayLoadingBar(20000);
-                
-                paymentSuccess = true;
-                cout << "                                   Payment Successfully made...................                                   \n  " << endl;
+                // Prepare the receipt
+                printReceipt(drinkName, drinkCost, change, tipAmount);
             }
             else {
-                cout << "                                   Invalid payment choice.                                   \n  " << endl;
-                continue;
+                cout << "                                   Insufficient payment. Please try again.                       " << endl;
+                break;
             }
 
-            if (paymentSuccess) {
-                cout << "                                   Preparing your " << drinkName << ". Enjoy!                                   \n  " << endl;
-                displayLoadingBar(10000); 
-                cout << "                                   Your Coffe is Ready Enjoy\n                                      " << endl;
-                cout << "                                   Nice Seeing You at our Coffe Station\n                                     " << endl;
-                cout << "\n \n   " << endl;
-                money += drinkCost;
-                water -= (drinkName == "Espresso" ? 50 : (drinkName == "Latte" ? 200 : 250));
-                milk -= (drinkName == "Latte" ? 150 : 0);
-                coffee -= (drinkName == "Espresso" ? 18 : 24);
+            // Check if there are sufficient resources to make the drink
+            if ((drinkName == "Espresso" && water < 50) ||
+                (drinkName == "Latte" && (water < 200 || milk < 150)) ||
+                (drinkName == "Cappuccino" && (water < 250 || milk < 150 || coffee < 24))) {
+                cout << "                                   Insufficient resources to make " << drinkName << ". Please choose another drink.                                   " << endl;
+                break;
             }
-            else {
-                cout << "                                   Payment failed. Please try again                                   \n  ." << endl;
-            }
+
+            // Prepare the drink
+            cout << "                                   Preparing your " << drinkName << ". Enjoy!                " << endl;
+            displayLoadingBar(10000);
+            cout << "                                   Your Coffee is Ready! Enjoy your " << drinkName << ".            " << endl;
+            cout << "                                   Nice Seeing You at our Coffee Station.                   " << endl;
+            money += (drinkCost + tipAmount);
+            water -= (drinkName == "Espresso" ? 50 : (drinkName == "Latte" ? 200 : 250));
+            milk -= (drinkName == "Latte" ? 150 : 0);
+            coffee -= (drinkName == "Espresso" ? 18 : 24);
+
             break;
         }
         case 2:
             cout << "                                   Water: " << water << "ml\n" << endl;
             cout << "                                   Milk: " << milk << "ml\n" << endl;
             cout << "                                   Coffee: " << coffee << "g\n" << endl;
-            cout << "\n" << endl;
             cout << "                                   Money: $" << fixed << setprecision(2) << money << endl;
             break;
         case 3:
-            cout << "Turning off the Coffee Machine. Goodbye!" << endl;
+            cout << "                                   Turning off the Coffee Machine. Goodbye!               " << endl;
             return 0;
         default:
-            cout << "Invalid choice. Please try again." << endl;
+            cout << "                                   Invalid choice. Please try again.                        " << endl;
         }
     }
 
